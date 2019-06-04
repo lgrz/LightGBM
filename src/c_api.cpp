@@ -26,6 +26,8 @@
 #include <stdexcept>
 #include <vector>
 
+#include <chrono>
+
 #include "application/predictor.hpp"
 
 namespace LightGBM {
@@ -1276,6 +1278,10 @@ int LGBM_BoosterPredictForCSR(BoosterHandle handle,
                               int64_t* out_len,
                               double* out_result) {
   API_BEGIN();
+  using clock = std::chrono::high_resolution_clock;
+  std::chrono::time_point<clock> start, stop;
+  std::chrono::nanoseconds time;
+
   auto param = Config::Str2Map(parameter);
   Config config;
   config.Set(param);
@@ -1285,8 +1291,13 @@ int LGBM_BoosterPredictForCSR(BoosterHandle handle,
   Booster* ref_booster = reinterpret_cast<Booster*>(handle);
   auto get_row_fun = RowFunctionFromCSR(indptr, indptr_type, indices, data, data_type, nindptr, nelem);
   int nrow = static_cast<int>(nindptr - 1);
+  start = clock::now();
   ref_booster->Predict(num_iteration, predict_type, nrow, get_row_fun,
                        config, out_result, out_len);
+  stop = clock::now();
+  int64_t ndocs = *out_len;
+  time = std::chrono::duration_cast<std::chrono::nanoseconds>(stop - start);
+  Log::Info("Prediction time: %ld documents in %lu ns, avg per doc %.4f ns", ndocs, time.count(), time.count() / float(ndocs));
   API_END();
 }
 
