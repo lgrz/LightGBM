@@ -99,6 +99,19 @@ class TreeLearner {
   static TreeLearner* CreateTreeLearner(const std::string& learner_type,
     const std::string& device_type,
     const Config* config);
+
+  // Joint Cascade Ranking
+  void PushBackPrevTreeLearner(TreeLearner* tree_learner) {
+    prev_tree_learners_.push_back(tree_learner);
+  }
+
+  // Joint Cascade Ranking
+  bool IsCascade() const {
+    return prev_tree_learners_.size() > 0;
+  }
+
+  // Joint Cascade Ranking
+  std::vector<TreeLearner*> prev_tree_learners_;
 };
 
 }  // namespace LightGBM

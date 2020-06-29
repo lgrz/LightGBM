@@ -113,6 +113,11 @@ class SerialTreeLearner: public TreeLearner {
   void RenewTreeOutput(Tree* tree, const ObjectiveFunction* obj, std::function<double(const label_t*, int)> residual_getter,
                        data_size_t total_num_data, const data_size_t* bag_indices, data_size_t bag_cnt) const override;
 
+  // Joint Cascade Ranking
+  const CostEfficientGradientBoosting* GetCEGB() const {
+    return cegb_.get();
+  }
+
  protected:
   void ComputeBestSplitForFeature(FeatureHistogram* histogram_array_,
                                   int feature_index, int real_fidx,

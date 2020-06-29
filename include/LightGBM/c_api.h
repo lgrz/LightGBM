@@ -1265,6 +1265,10 @@ LIGHTGBM_C_EXPORT int LGBM_NetworkInitWithFunctions(int num_machines,
                                                     void* reduce_scatter_ext_fun,
                                                     void* allgather_ext_fun);
 
+// Joint Cascade Ranking
+LIGHTGBM_C_EXPORT int LGBM_BoosterAddPreviousStage(BoosterHandle handle,
+                                                   BoosterHandle prev_handle);
+
 #if defined(_MSC_VER)
 #define THREAD_LOCAL __declspec(thread)  /*!< \brief Thread local specifier. */
 #else

@@ -3211,3 +3211,10 @@ class Booster(object):
             else:
                 self.__attr.pop(key, None)
         return self
+
+    def append_previous_stage(self, booster):
+        """Append a previous ranking stage to this booster. Allows using
+           features from a previous stage for free. Requres the
+           `cegb_penalty_feature_lazy` which is applied once per datapoint.
+        """
+        _safe_call(_LIB.LGBM_BoosterAddPreviousStage(self.handle, booster.handle))

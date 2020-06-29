@@ -87,6 +87,11 @@ class CostEfficientGradientBoosting {
     }
   }
 
+  // Joint Cascade Ranking
+  const std::vector<uint32_t>& GetFeatureUsedInData() const {
+    return feature_used_in_data_;
+  }
+
  private:
   double CalculateOndemandCosts(int feature_index, int real_fidx, int leaf_index) const {
     if (tree_learner_->config_->cegb_penalty_feature_lazy.empty()) {
@@ -101,6 +106,19 @@ class CostEfficientGradientBoosting {
 
     for (data_size_t i_input = 0; i_input < cnt_leaf_data; ++i_input) {
       int real_idx = tmp_idx[i_input];
+      // Joint Cascade Ranking
+      // --
+      // Feature extraction penalty is only applied to the first cascade stage
+      // the feature was used. Subsequent stages can use the feature without cost
+      // penalty.
+      for (size_t i = 0; i < tree_learner_->prev_tree_learners_.size(); ++i) {
+        auto curr_tree_learner = dynamic_cast<const SerialTreeLearner*>(tree_learner_->prev_tree_learners_[i]);
+        if (Common::FindInBitset(curr_tree_learner->GetCEGB()->GetFeatureUsedInData().data(),
+                                 train_data->num_data() * train_data->num_features(),
+                                 train_data->num_data() * feature_index + real_idx)) {
+          continue;
+        }
+      }
       if (Common::FindInBitset(feature_used_in_data_.data(), train_data->num_data() * train_data->num_features(), train_data->num_data() * feature_index + real_idx)) {
         continue;
       }

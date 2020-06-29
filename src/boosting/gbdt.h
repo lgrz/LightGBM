@@ -382,6 +382,11 @@ class GBDT : public GBDTBase {
   */
   const char* SubModelName() const override { return "tree"; }
 
+  // Joint Cascade Ranking
+  TreeLearner* GetTreeLearner() const {
+    return tree_learner_.get();
+  }
+
  protected:
   virtual bool GetIsConstHessian(const ObjectiveFunction* objective_function) {
     if (objective_function != nullptr) {

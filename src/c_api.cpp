@@ -12,6 +12,7 @@
 #include <LightGBM/network.h>
 #include <LightGBM/objective_function.h>
 #include <LightGBM/prediction_early_stop.h>
+#include <LightGBM/tree_learner.h> // Joint Cascade Ranking
 #include <LightGBM/utils/common.h>
 #include <LightGBM/utils/log.h>
 #include <LightGBM/utils/openmp_wrapper.h>
@@ -794,6 +795,13 @@ class Booster {
   }
 
   const Boosting* GetBoosting() const { return boosting_.get(); }
+
+  // Joint Cascade Ranking
+  void AddPrevStage(Booster* prev_booster) {
+    auto curr_boosting = dynamic_cast<const GBDTBase*>(GetBoosting());
+    auto prev_boosting = dynamic_cast<const GBDTBase*>(prev_booster->GetBoosting());
+    curr_boosting->GetTreeLearner()->PushBackPrevTreeLearner(prev_boosting->GetTreeLearner());
+  }
 
  private:
   const Dataset* train_data_;
@@ -2269,6 +2277,16 @@ int LGBM_NetworkInitWithFunctions(int num_machines, int rank,
   if (num_machines > 1) {
     Network::Init(num_machines, rank, (ReduceScatterFunction)reduce_scatter_ext_fun, (AllgatherFunction)allgather_ext_fun);
   }
+  API_END();
+}
+
+// Joint Cascade Ranking
+int LGBM_BoosterAddPreviousStage(BoosterHandle handle,
+                                 BoosterHandle prev_handle) {
+  API_BEGIN();
+  Booster* ref_booster = reinterpret_cast<Booster*>(handle);
+  Booster* prev_ref_booster = reinterpret_cast<Booster*>(prev_handle);
+  ref_booster->AddPrevStage(prev_ref_booster);
   API_END();
 }
 

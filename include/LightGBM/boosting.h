@@ -20,6 +20,7 @@ class Dataset;
 class ObjectiveFunction;
 class Metric;
 struct PredictionEarlyStopInstance;
+class TreeLearner; // Joint Cascade Ranking
 
 /*!
 * \brief The interface for Boosting
@@ -317,6 +318,9 @@ class GBDTBase : public Boosting {
  public:
   virtual double GetLeafValue(int tree_idx, int leaf_idx) const = 0;
   virtual void SetLeafValue(int tree_idx, int leaf_idx, double val) = 0;
+
+  // Joint Cascade Ranking
+  virtual TreeLearner* GetTreeLearner() const = 0;
 };
 
 }  // namespace LightGBM
